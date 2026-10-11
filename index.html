@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tenant Management System</title>
-    <!-- Tailwind CSS CDN -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -13,7 +16,7 @@
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // TODO: Yahan apni Firebase Project ki configuration dalein
-const firebaseConfig = {
+       const firebaseConfig = {
   apiKey: "AIzaSyAQXIiFPpZ2-VpoEHWK7lyayjJuxA58FPE",
   authDomain: "kiraedar-manager.firebaseapp.com",
   projectId: "kiraedar-manager",
@@ -22,11 +25,12 @@ const firebaseConfig = {
   appId: "1:549691331995:web:60266f0df1a88599a9bd3e",
   measurementId: "G-E70WNPXJ1K"
 };
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Expose functions globally for UI
+        // Global exposure for UI interactions
         window.auth = auth;
         window.db = db;
         window.signInWithEmailAndPassword = signInWithEmailAndPassword;
@@ -39,109 +43,196 @@ const firebaseConfig = {
         window.doc = doc;
         window.updateDoc = updateDoc;
 
+        // Auth State Listener
         onAuthStateChanged(auth, (user) => {
+            const authSection = document.getElementById('auth-section');
+            const dashboardSection = document.getElementById('dashboard-section');
+            const userEmailSpan = document.getElementById('user-email');
+
             if (user) {
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('dashboard-section').classList.remove('hidden');
+                authSection.classList.add('hidden');
+                dashboardSection.classList.remove('hidden');
+                userEmailSpan.innerText = user.email;
                 loadTenants();
             } else {
-                document.getElementById('auth-section').classList.remove('hidden');
-                document.getElementById('dashboard-section').classList.add('hidden');
+                authSection.classList.remove('hidden');
+                dashboardSection.classList.add('hidden');
             }
         });
     </script>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen text-slate-800 font-sans">
 
     <!-- Auth Section (Login / Signup) -->
-    <div id="auth-section" class="flex items-center justify-center min-h-screen">
-        <div class="bg-white p-8 rounded-lg shadow-md w-96">
-            <h2 id="auth-title" class="text-2xl font-bold mb-6 text-center text-blue-600">Tenant Login</h2>
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
-                <input type="email" id="email" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <div id="auth-section" class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-14 h-14 bg-indigo-50 text-indigo-600 rounded-full text-2xl mb-3 shadow-inner">
+                    <i class="fa-solid fa-building-user"></i>
+                </div>
+                <h2 id="auth-title" class="text-2xl font-bold text-slate-900">Admin Portal</h2>
+                <p class="text-slate-500 text-sm mt-1">Sign in to manage your tenants & rooms</p>
             </div>
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
-                <input type="password" id="password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-slate-700 text-xs font-semibold uppercase tracking-wider mb-1">Email Address</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-envelope"></i></span>
+                        <input type="email" id="email" placeholder="admin@example.com" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-slate-700 text-xs font-semibold uppercase tracking-wider mb-1">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="password" placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                    </div>
+                </div>
+                <button onclick="handleAuth()" id="auth-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-100 transition duration-200 mt-2">Login</button>
             </div>
-            <button onclick="handleAuth()" id="auth-btn" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition">Login</button>
-            <p class="mt-4 text-center text-sm text-gray-600">
-                <span id="toggle-text">Account nahi hai?</span> 
-                <button onclick="toggleAuthMode()" class="text-blue-600 font-bold hover:underline" id="toggle-btn">Sign Up karein</button>
+
+            <p class="mt-6 text-center text-sm text-slate-600">
+                <span id="toggle-text">Don't have an account?</span> 
+                <button onclick="toggleAuthMode()" class="text-indigo-600 font-semibold hover:underline ml-1" id="toggle-btn">Sign Up</button>
             </p>
         </div>
     </div>
 
     <!-- Dashboard Section -->
-    <div id="dashboard-section" class="hidden container mx-auto px-4 py-8">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">Tenant Management Dashboard</h1>
-            <button onclick="window.signOut(window.auth)" class="bg-red-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-600 transition">Logout</button>
-        </div>
+    <div id="dashboard-section" class="hidden min-h-screen flex flex-col">
+        <!-- Navbar -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-100">
+                        <i class="fa-solid fa-hotel"></i>
+                    </div>
+                    <span class="text-xl font-bold text-slate-900 tracking-tight">TenantManager</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="user-email" class="text-sm font-medium text-slate-600 hidden sm:inline-block bg-slate-100 px-3 py-1.5 rounded-lg"></span>
+                    <button onclick="window.signOut(window.auth)" class="bg-rose-50 text-rose-600 hover:bg-rose-100 font-medium px-4 py-2 rounded-xl text-sm transition flex items-center space-x-2">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
+        </header>
 
-        <!-- Add Tenant Form -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-xl font-bold mb-4 text-gray-700">Add New Tenant</h2>
-            <form id="tenant-form" onsubmit="addTenant(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input type="text" id="t-name" placeholder="Tenant Name" required class="px-3 py-2 border rounded-lg">
-                <input type="text" id="t-aadhar" placeholder="Aadhar Card Number" required class="px-3 py-2 border rounded-lg">
-                <input type="text" id="t-room" placeholder="Room Number" required class="px-3 py-2 border rounded-lg">
-                <input type="number" id="t-rent" placeholder="Rent Amount (₹)" required class="px-3 py-2 border rounded-lg">
-                <input type="date" id="t-duedate" required class="px-3 py-2 border rounded-lg">
-                <select id="t-status" class="px-3 py-2 border rounded-lg">
-                    <option value="Due">Due / Pending</option>
-                    <option value="Advance">Advance Paid</option>
-                </select>
-                <input type="text" id="t-phone" placeholder="WhatsApp Phone (e.g. 919876543210)" required class="px-3 py-2 border rounded-lg md:col-span-3">
-                <button type="submit" class="bg-green-600 text-white py-2 rounded-lg font-bold hover:bg-green-700 transition md:col-span-3">Save Tenant</button>
-            </form>
-        </div>
+        <!-- Main Content Area -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+            
+            <!-- Add Tenant Form Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 mb-8">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                        <i class="fa-solid fa-user-plus text-lg"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-slate-900">Add New Tenant Details</h2>
+                </div>
 
-        <!-- Tenant List Table -->
-        <div class="bg-white rounded-lg shadow-md overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-200 text-gray-700 uppercase text-sm">
-                        <th class="py-3 px-4">Room</th>
-                        <th class="py-3 px-4">Name</th>
-                        <th class="py-3 px-4">Aadhar</th>
-                        <th class="py-3 px-4">Rent</th>
-                        <th class="py-3 px-4">Due Date / Status</th>
-                        <th class="py-3 px-4">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="tenant-list" class="text-gray-600 divide-y divide-gray-200">
-                    <!-- Dynamic Rows -->
-                </tbody>
-            </table>
-        </div>
+                <form id="tenant-form" onsubmit="addTenant(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Tenant Name</label>
+                        <input type="text" id="t-name" placeholder="e.g. Rahul Sharma" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Aadhar Card Number</label>
+                        <input type="text" id="t-aadhar" placeholder="xxxx xxxx xxxx" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Room Number</label>
+                        <input type="text" id="t-room" placeholder="e.g. Room 102" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Rent Amount (₹)</label>
+                        <input type="number" id="t-rent" placeholder="e.g. 5000" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Due Date</label>
+                        <input type="date" id="t-duedate" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Payment Status</label>
+                        <select id="t-status" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                            <option value="Due">Due / Pending</option>
+                            <option value="Advance">Advance Paid</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2 lg:col-span-3">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">WhatsApp Phone Number</label>
+                        <input type="text" id="t-phone" placeholder="Format with country code, e.g. 919876543210" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                    </div>
+                    <div class="sm:col-span-2 lg:col-span-3 pt-2">
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-emerald-100 transition duration-200 flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>Save Tenant Record</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tenants List Table Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-6 py-5 border-b border-slate-200 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-900 text-lg">Active Tenants Directory</h3>
+                    <button onclick="loadTenants()" class="text-indigo-600 hover:text-indigo-800 text-sm font-semibold flex items-center space-x-1">
+                        <i class="fa-solid fa-rotate"></i>
+                        <span>Refresh</span>
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 uppercase text-xs tracking-wider border-b border-slate-200">
+                                <th class="py-4 px-6 font-semibold">Room</th>
+                                <th class="py-4 px-6 font-semibold">Tenant Details</th>
+                                <th class="py-4 px-6 font-semibold">Aadhar</th>
+                                <th class="py-4 px-6 font-semibold">Rent</th>
+                                <th class="py-4 px-6 font-semibold">Due Date / Status</th>
+                                <th class="py-4 px-6 font-semibold text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tenant-list" class="divide-y divide-slate-100 text-slate-700 text-sm">
+                            <!-- Dynamic Content Rendered Here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <!-- Application Logic Script -->
+    <!-- Application Script Logic -->
     <script>
         let isSignUp = false;
 
         function toggleAuthMode() {
             isSignUp = !isSignUp;
-            document.getElementById('auth-title').innerText = isSignUp ? "Tenant Sign Up" : "Tenant Login";
+            document.getElementById('auth-title').innerText = isSignUp ? "Create Account" : "Admin Portal";
             document.getElementById('auth-btn').innerText = isSignUp ? "Sign Up" : "Login";
-            document.getElementById('toggle-text').innerText = isSignUp ? "Pehle se account hai?" : "Account nahi hai?";
-            document.getElementById('toggle-btn').innerText = isSignUp ? "Login karein" : "Sign Up karein";
+            document.getElementById('toggle-text').innerText = isSignUp ? "Already have an account?" : "Don't have an account?";
+            document.getElementById('toggle-btn').innerText = isSignUp ? "Login" : "Sign Up";
         }
 
         async function handleAuth() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if(!email || !password) {
+                alert("Please fill in both email and password.");
+                return;
+            }
+
             try {
                 if (isSignUp) {
                     await window.createUserWithEmailAndPassword(window.auth, email, password);
-                    alert("Account created & logged in successfully!");
+                    alert("Account registered successfully!");
                 } else {
                     await window.signInWithEmailAndPassword(window.auth, email, password);
                 }
             } catch (error) {
-                alert("Error: " + error.message);
+                alert("Authentication Error: " + error.message);
             }
         }
 
@@ -163,36 +254,51 @@ const firebaseConfig = {
                 loadTenants();
                 alert("Tenant added successfully!");
             } catch (error) {
-                alert("Error adding tenant: " + error.message);
+                alert("Error saving tenant: " + error.message);
             }
         }
 
         async function loadTenants() {
             const tbody = document.getElementById('tenant-list');
-            tbody.innerHTML = "<tr><td colspan='6' class='py-4 text-center'>Loading...</td></tr>";
+            tbody.innerHTML = `<tr><td colspan='6' class='py-8 text-center text-slate-400'><i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading data...</td></tr>`;
             try {
                 const querySnapshot = await window.getDocs(window.collection(window.db, "tenants"));
                 tbody.innerHTML = "";
+                
+                if(querySnapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan='6' class='py-8 text-center text-slate-400'>No tenant records found.</td></tr>`;
+                    return;
+                }
+
                 querySnapshot.forEach((docSnap) => {
                     const t = docSnap.data();
                     const id = docSnap.id;
                     
-                    // Advance payment logic: agar advance ho toh due date hide karein
+                    // Advance payment logic: agar advance ho toh due date hide karke badge dikhayein
                     const dueDisplay = t.status === 'Advance' 
-                        ? `<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">Advance Paid (No Due)</span>` 
-                        : `<span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold">Due: ${t.dueDate}</span>`;
+                        ? `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700"><i class="fa-solid fa-circle-check mr-1.5 text-[10px]"></i> Advance Paid (No Due)</span>` 
+                        : `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700"><i class="fa-solid fa-clock mr-1.5 text-[10px]"></i> Due: ${t.dueDate}</span>`;
 
                     const row = `
-                        <tr class="hover:bg-gray-50">
-                            <td class="py-3 px-4">${t.room}</td>
-                            <td class="py-3 px-4 font-bold">${t.name}</td>
-                            <td class="py-3 px-4">${t.aadhar}</td>
-                            <td class="py-3 px-4">₹${t.rent}</td>
-                            <td class="py-3 px-4">${dueDisplay}</td>
-                            <td class="py-3 px-4 space-x-2">
-                                <a href="https://wa.me/${t.phone}?text=Hello%20${t.name},%20aapka%20room%20no%20${t.room}%20ka%20rent%20₹${t.rent}%20due%20hai.%20Kripya%20jald%20pay%20karein." target="_blank" class="bg-green-500 text-white px-3 py-1 rounded text-xs font-bold hover:bg-green-600">WhatsApp</a>
-                                <button onclick="toggleStatus('${id}', '${t.status}')" class="bg-yellow-500 text-white px-3 py-1 rounded text-xs font-bold hover:bg-yellow-600">Toggle Status</button>
-                                <button onclick="deleteTenant('${id}')" class="bg-red-500 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-600">Delete</button>
+                        <tr class="hover:bg-slate-50/80 transition">
+                            <td class="py-4 px-6 font-bold text-slate-900">${t.room}</td>
+                            <td class="py-4 px-6">
+                                <div class="font-semibold text-slate-900">${t.name}</div>
+                                <div class="text-xs text-slate-400"><i class="fa-solid fa-phone mr-1"></i>${t.phone}</div>
+                            </td>
+                            <td class="py-4 px-6 font-mono text-xs text-slate-600">${t.aadhar}</td>
+                            <td class="py-4 px-6 font-semibold text-slate-900">₹${t.rent}</td>
+                            <td class="py-4 px-6">${dueDisplay}</td>
+                            <td class="py-4 px-6 text-center space-x-1">
+                                <a href="https://wa.me/${t.phone}?text=Hello%20${encodeURIComponent(t.name)},%20aapka%20room%20no%20${encodeURIComponent(t.room)}%20ka%20rent%20₹${t.rent}%20due%20hai.%20Kripya%20jald%20pay%20karein." target="_blank" title="Send WhatsApp Reminder" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition">
+                                    <i class="fa-brands fa-whatsapp"></i>
+                                </a>
+                                <button onclick="toggleStatus('${id}', '${t.status}')" title="Toggle Status (Due/Advance)" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white transition">
+                                    <i class="fa-solid fa-shuffle"></i>
+                                </button>
+                                <button onclick="deleteTenant('${id}')" title="Delete Tenant" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
                             </td>
                         </tr>
                     `;
@@ -200,6 +306,7 @@ const firebaseConfig = {
                 });
             } catch (error) {
                 console.error(error);
+                tbody.innerHTML = `<tr><td colspan='6' class='py-8 text-center text-rose-500'>Failed to load data. Check console.</td></tr>`;
             }
         }
 
@@ -214,7 +321,7 @@ const firebaseConfig = {
         }
 
         async function deleteTenant(id) {
-            if (confirm("Kya aap sach me is tenant ko delete karna chahte hain?")) {
+            if (confirm("Kya aap sach me is tenant record ko delete karna chahte hain?")) {
                 try {
                     await window.deleteDoc(window.doc(window.db, "tenants", id));
                     loadTenants();
