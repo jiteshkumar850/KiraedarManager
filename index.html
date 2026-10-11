@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Tenant Manager | Smart Portal</title>
+    <title>Nexus Tenant Manager | Smart Financial Dashboard</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -82,7 +82,7 @@
                     </div>
                     <div>
                         <span class="text-lg font-bold text-white tracking-tight block">NexusSpaces</span>
-                        <span class="text-xs text-slate-400 font-medium">Tenant & Rent Analytics System</span>
+                        <span class="text-xs text-slate-400 font-medium">Tenant & Real-time Collection System</span>
                     </div>
                 </div>
 
@@ -93,7 +93,7 @@
                         <span id="user-email" class="text-xs font-medium text-slate-300"></span>
                     </div>
                     
-                    <!-- 📊 Reports Button Right Next to Email -->
+                    <!-- Reports Button -->
                     <button onclick="openReportModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-xl text-xs transition flex items-center space-x-2 shadow-lg shadow-indigo-600/20">
                         <i class="fa-solid fa-chart-line"></i>
                         <span>Reports</span>
@@ -111,8 +111,8 @@
         <!-- Main Layout -->
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-8">
             
-            <!-- Quick Stats -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <!-- Financial Overview Stats (Received vs Pending/Due Breakdown) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 flex items-center justify-between">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Tenants</p>
@@ -122,22 +122,36 @@
                         <i class="fa-solid fa-users"></i>
                     </div>
                 </div>
+
                 <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 flex items-center justify-between">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Rent Value</p>
-                        <h4 id="stat-revenue" class="text-2xl font-bold text-white mt-1">₹0</h4>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Expected Rent</p>
+                        <h4 id="stat-revenue" class="text-2xl font-bold text-slate-100 mt-1">₹0</h4>
                     </div>
-                    <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center text-xl border border-emerald-500/20">
-                        <i class="fa-solid fa-wallet"></i>
+                    <div class="w-12 h-12 bg-blue-500/10 text-blue-400 rounded-xl flex items-center justify-center text-xl border border-blue-500/20">
+                        <i class="fa-solid fa-scale-balanced"></i>
                     </div>
                 </div>
+
+                <!-- Received Amount -->
                 <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 flex items-center justify-between">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Overdue Payments</p>
-                        <h4 id="stat-overdue" class="text-2xl font-bold text-rose-400 mt-1">0</h4>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Rent Received (Current Mo.)</p>
+                        <h4 id="stat-received" class="text-2xl font-bold text-emerald-400 mt-1">₹0</h4>
+                    </div>
+                    <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center text-xl border border-emerald-500/20">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+
+                <!-- Pending / Due Amount -->
+                <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Rent Due / Pending</p>
+                        <h4 id="stat-due" class="text-2xl font-bold text-rose-400 mt-1">₹0</h4>
                     </div>
                     <div class="w-12 h-12 bg-rose-500/10 text-rose-400 rounded-xl flex items-center justify-center text-xl border border-rose-500/20">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <i class="fa-solid fa-clock-rotate-left"></i>
                     </div>
                 </div>
             </div>
@@ -234,7 +248,7 @@
         </main>
     </div>
 
-    <!-- 📊 MONTHLY REPORTS MODAL -->
+    <!-- MONTHLY REPORTS MODAL -->
     <div id="report-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl relative space-y-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-800 pb-4">
@@ -625,7 +639,7 @@
             }
         }
 
-        // Load Tenants
+        // Load Tenants with Dynamic Received & Due Sums
         async function loadTenants() {
             const tbody = document.getElementById('tenant-list');
             tbody.innerHTML = `<tr><td colspan='6' class='py-10 text-center text-slate-500'><i class="fa-solid fa-spinner fa-spin mr-2"></i> Syncing directory...</td></tr>`;
@@ -645,13 +659,17 @@
                     tbody.innerHTML = `<tr><td colspan='6' class='py-12 text-center text-slate-500 font-medium'>No tenant records found.</td></tr>`;
                     document.getElementById('stat-total').innerText = "0";
                     document.getElementById('stat-revenue').innerText = "₹0";
-                    document.getElementById('stat-overdue').innerText = "0";
+                    document.getElementById('stat-received').innerText = "₹0";
+                    document.getElementById('stat-due').innerText = "₹0";
                     return;
                 }
 
                 let totalCount = 0;
-                let totalRevenue = 0;
-                let overdueCount = 0;
+                let totalExpectedRevenue = 0;
+                let totalReceivedCurrentMonth = 0;
+                let totalPendingDueAmount = 0;
+
+                const currentMonthKey = new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0');
 
                 data.documents.forEach((doc) => {
                     const docId = doc.name.split('/').pop();
@@ -660,7 +678,7 @@
                     const name = fields.name ? fields.name.stringValue : '';
                     const aadhar = fields.aadhar ? fields.aadhar.stringValue : '';
                     const room = fields.room ? fields.room.stringValue : '';
-                    const rent = fields.rent ? (fields.rent.integerValue || fields.rent.stringValue) : 0;
+                    const rent = fields.rent ? Number(fields.rent.integerValue || fields.rent.stringValue) : 0;
                     const baseDueDate = fields.dueDate ? fields.dueDate.stringValue : '';
                     const status = fields.status ? fields.status.stringValue : 'Due';
                     const phone = fields.phone ? fields.phone.stringValue : '';
@@ -668,16 +686,39 @@
                     tenantCache[docId] = { name, aadhar, room, rent, dueDate: baseDueDate, status, phone };
 
                     totalCount++;
-                    totalRevenue += Number(rent);
+                    totalExpectedRevenue += rent;
+
+                    // Calculate payments for current month
+                    let tenantMonthPaymentsSum = 0;
+                    if (fields.payments && fields.payments.arrayValue && fields.payments.arrayValue.values) {
+                        fields.payments.arrayValue.values.forEach(v => {
+                            const pf = v.mapValue.fields;
+                            const pDate = pf.date ? pf.date.stringValue : '';
+                            const pAmt = pf.amount ? Number(pf.amount.integerValue || pf.amount.stringValue) : 0;
+                            if(pDate && pDate.startsWith(currentMonthKey)) {
+                                tenantMonthPaymentsSum += pAmt;
+                            }
+                        });
+                    }
+
+                    totalReceivedCurrentMonth += tenantMonthPaymentsSum;
+
+                    // Calculate pending rent
+                    if (status === 'Advance') {
+                        // Fully paid / Advance
+                    } else {
+                        const remaining = rent - tenantMonthPaymentsSum;
+                        if (remaining > 0) {
+                            totalPendingDueAmount += remaining;
+                        }
+                    }
 
                     const dueInfo = calculateCurrentMonthDue(baseDueDate, status);
-                    if(dueInfo.isOverdue) overdueCount++;
 
                     const waMessage = status === 'Advance'
                         ? `Hello ${name}, aapka room no ${room} ka rent advance paid hai. Dhanyawad!`
                         : `Hello ${name}, aapka room no ${room} ka rent ₹${rent} due hai (Due Date: ${dueInfo.dateStr}). Kripya jald pay karein.`;
 
-                    // ✏️ Edit Button & Delete Button side by side in Actions column
                     const row = `
                         <tr class="hover:bg-slate-900/40 transition">
                             <td class="py-4 px-6 font-bold text-white">${room}</td>
@@ -699,12 +740,10 @@
                                     <i class="fa-solid fa-rotate-right text-xs"></i>
                                 </button>
 
-                                <!-- ✏️ EDIT BUTTON RIGHT BEFORE DELETE -->
                                 <button onclick="editTenant('${docId}')" title="Edit Tenant Details" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500 hover:text-white transition border border-cyan-500/20">
                                     <i class="fa-solid fa-pen text-xs"></i>
                                 </button>
 
-                                <!-- 🗑️ DELETE BUTTON -->
                                 <button onclick="deleteTenant('${docId}')" title="Delete Tenant" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white transition border border-rose-500/20">
                                     <i class="fa-regular fa-trash-can text-xs"></i>
                                 </button>
@@ -715,8 +754,9 @@
                 });
 
                 document.getElementById('stat-total').innerText = totalCount;
-                document.getElementById('stat-revenue').innerText = "₹" + totalRevenue.toLocaleString('en-IN');
-                document.getElementById('stat-overdue').innerText = overdueCount;
+                document.getElementById('stat-revenue').innerText = "₹" + totalExpectedRevenue.toLocaleString('en-IN');
+                document.getElementById('stat-received').innerText = "₹" + totalReceivedCurrentMonth.toLocaleString('en-IN');
+                document.getElementById('stat-due').innerText = "₹" + totalPendingDueAmount.toLocaleString('en-IN');
 
             } catch (err) {
                 console.error(err);
@@ -767,7 +807,6 @@
         }
 
         // MONTHLY REPORTS LOGIC
-
         function openReportModal() {
             document.getElementById('report-modal').classList.remove('hidden');
             const today = new Date();
@@ -871,7 +910,6 @@
         }
 
         // PAYMENT HISTORY LOGIC
-
         async function openPaymentModal(docId) {
             activeTenantDocId = docId;
             document.getElementById('payment-modal').classList.remove('hidden');
