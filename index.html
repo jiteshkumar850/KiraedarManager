@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Tenant Manager | Modern Portal</title>
+    <title>Nexus Tenant Manager | Premium Portal</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -22,7 +22,7 @@
 </head>
 <body class="h-full font-sans text-slate-100 bg-slate-950 selection:bg-indigo-500 selection:text-white">
 
-    <!-- Auth Section (Ultra-Modern Glassmorphism Login) -->
+    <!-- Auth Section -->
     <div id="auth-section" class="flex min-h-full items-center justify-center px-4 py-12 sm:px-6 lg:px-8 relative overflow-hidden">
         <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -33,7 +33,7 @@
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
                 <h2 id="auth-title" class="text-2xl font-bold tracking-tight text-white">Admin Authentication</h2>
-                <p class="text-sm text-slate-400 mt-1">Sign in to manage tenants & properties</p>
+                <p class="text-sm text-slate-400 mt-1">Sign in to manage tenants & payments</p>
             </div>
 
             <div class="space-y-5 mt-6">
@@ -41,14 +41,14 @@
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Email Address</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500"><i class="fa-regular fa-envelope"></i></span>
-                        <input type="email" id="email" placeholder="admin@example.com" class="w-full pl-11 pr-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-sm">
+                        <input type="email" id="email" placeholder="admin@example.com" class="w-full pl-11 pr-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition text-sm">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Password</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500"><i class="fa-regular fa-lock"></i></span>
-                        <input type="password" id="password" placeholder="••••••••" class="w-full pl-11 pr-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-sm">
+                        <input type="password" id="password" placeholder="••••••••" class="w-full pl-11 pr-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition text-sm">
                     </div>
                 </div>
 
@@ -66,7 +66,7 @@
 
     <!-- Dashboard Section -->
     <div id="dashboard-section" class="hidden min-h-full flex flex-col bg-slate-950">
-        <!-- Premium Navbar -->
+        <!-- Header -->
         <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex justify-between items-center">
                 <div class="flex items-center space-x-3">
@@ -75,7 +75,7 @@
                     </div>
                     <div>
                         <span class="text-lg font-bold text-white tracking-tight block">NexusSpaces</span>
-                        <span class="text-xs text-slate-400 font-medium">Tenant & Rental Intelligence</span>
+                        <span class="text-xs text-slate-400 font-medium">Tenant & Payment Intelligence</span>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -91,10 +91,10 @@
             </div>
         </header>
 
-        <!-- Main Content Layout -->
+        <!-- Main Layout -->
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-8">
             
-            <!-- Quick Stats Metrics -->
+            <!-- Quick Stats -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 flex items-center justify-between">
                     <div>
@@ -116,7 +116,7 @@
                 </div>
                 <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 flex items-center justify-between">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Advance Paid</p>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Advance Paid Status</p>
                         <h4 id="stat-advance" class="text-2xl font-bold text-white mt-1">0</h4>
                     </div>
                     <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-xl flex items-center justify-center text-xl border border-amber-500/20">
@@ -127,7 +127,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 
-                <!-- Add Tenant Form Card -->
+                <!-- Add Tenant Form -->
                 <div class="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 sm:p-7 shadow-xl backdrop-blur-md lg:col-span-1">
                     <div class="flex items-center space-x-3 mb-6">
                         <div class="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl border border-indigo-500/20">
@@ -183,7 +183,7 @@
                             <div class="p-2.5 bg-violet-500/10 text-violet-400 rounded-xl border border-violet-500/20">
                                 <i class="fa-solid fa-list-check text-base"></i>
                             </div>
-                            <h3 class="font-bold text-white text-base">Active Tenants Directory</h3>
+                            <h3 class="font-bold text-white text-base">Active Tenants & Payment Registry</h3>
                         </div>
                         <button onclick="loadTenants()" class="text-slate-400 hover:text-white text-xs font-semibold flex items-center space-x-1.5 bg-slate-800/50 hover:bg-slate-800 px-3 py-2 rounded-xl transition border border-slate-700/50">
                             <i class="fa-solid fa-rotate"></i>
@@ -200,7 +200,7 @@
                                     <th class="py-4 px-6 font-semibold">Aadhar</th>
                                     <th class="py-4 px-6 font-semibold">Rent</th>
                                     <th class="py-4 px-6 font-semibold">Due Date / Status</th>
-                                    <th class="py-4 px-6 font-semibold text-center">Actions</th>
+                                    <th class="py-4 px-6 font-semibold text-center">Actions & Payments</th>
                                 </tr>
                             </thead>
                             <tbody id="tenant-list" class="divide-y divide-slate-800/60 text-slate-300 text-sm">
@@ -213,7 +213,45 @@
         </main>
     </div>
 
-    <!-- Firebase API Script Logic (Direct - No Setup Required!) -->
+    <!-- Payment History Modal -->
+    <div id="payment-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative space-y-5">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <div>
+                    <h3 id="modal-title" class="text-lg font-bold text-white">Payment Records</h3>
+                    <p class="text-xs text-slate-400">Manage rent payment logs for tenant</p>
+                </div>
+                <button onclick="closePaymentModal()" class="w-8 h-8 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Add Payment Form inside Modal -->
+            <form id="payment-form" onsubmit="addPaymentRecord(event)" class="grid grid-cols-3 gap-3 bg-slate-950/50 p-4 rounded-2xl border border-slate-800">
+                <input type="hidden" id="modal-tenant-id">
+                <div>
+                    <label class="block text-[10px] font-semibold uppercase text-slate-400 mb-1">Amount (₹)</label>
+                    <input type="number" id="p-amount" placeholder="5000" required class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-semibold uppercase text-slate-400 mb-1">Date Paid</label>
+                    <input type="date" id="p-date" required class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs">
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 rounded-xl text-xs transition shadow-md shadow-indigo-600/30">
+                        <i class="fa-solid fa-plus mr-1"></i> Add Log
+                    </button>
+                </div>
+            </form>
+
+            <!-- Payment Logs List -->
+            <div class="max-h-60 overflow-y-auto space-y-2 pr-1" id="payment-logs-list">
+                <!-- Dynamic payment logs -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Logic -->
     <script>
         // 🔑 BAS YAHAN APNI FIREBASE CONFIG DETAILS BADLEIN:
         const API_KEY = "AIzaSyAQXIiFPpZ2-VpoEHWK7lyayjJuxA58FPE";
@@ -222,8 +260,9 @@
         let userToken = localStorage.getItem('user_token') || null;
         let currentUserEmail = localStorage.getItem('user_email') || null;
         let isSignUp = false;
+        let activeTenantDocId = null;
+        let activeTenantData = null;
 
-        // Check login status on page load
         window.onload = () => {
             if (userToken) {
                 showDashboard();
@@ -296,7 +335,6 @@
         }
 
         // Add Tenant
-// Add Tenant
         async function addTenant(e) {
             e.preventDefault();
             const name = document.getElementById('t-name').value;
@@ -317,7 +355,8 @@
                     rent: { integerValue: Number(rent) },
                     dueDate: { stringValue: dueDate },
                     status: { stringValue: status },
-                    phone: { stringValue: phone }
+                    phone: { stringValue: phone },
+                    payments: { arrayValue: { values: [] } }
                 }
             };
 
@@ -326,7 +365,7 @@
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${userToken}` // 👈 Yeh line zaroori hai
+                        'Authorization': `Bearer ${userToken}` 
                     },
                     body: JSON.stringify(body)
                 });
@@ -351,9 +390,7 @@
 
             try {
                 const res = await fetch(firestoreUrl, {
-                    headers: {
-                        'Authorization': `Bearer ${userToken}` // 👈 Token passed here too
-                    }
+                    headers: { 'Authorization': `Bearer ${userToken}` }
                 });
                 const data = await res.json();
                 tbody.innerHTML = "";
@@ -386,9 +423,15 @@
                     totalRevenue += Number(rent);
                     if(status === 'Advance') advanceCount++;
 
+                    // Advance Logic: Agar Advance ho toh due date hide karein
                     const dueDisplay = status === 'Advance' 
                         ? `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-circle-check mr-1.5 text-[10px]"></i> Advance Paid (No Due)</span>` 
                         : `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20"><i class="fa-solid fa-clock mr-1.5 text-[10px]"></i> Due: ${dueDate}</span>`;
+
+                    // WhatsApp Message with smart due checking
+                    const waMessage = status === 'Advance'
+                        ? `Hello ${name}, aapka room no ${room} ka rent advance paid hai. Dhanyawad!`
+                        : `Hello ${name}, aapka room no ${room} ka rent ₹${rent} due hai (Due Date: ${dueDate}). Kripya jald pay karein.`;
 
                     const row = `
                         <tr class="hover:bg-slate-900/40 transition">
@@ -401,10 +444,13 @@
                             <td class="py-4 px-6 font-semibold text-white">₹${rent}</td>
                             <td class="py-4 px-6">${dueDisplay}</td>
                             <td class="py-4 px-6 text-center space-x-1.5">
-                                <a href="https://wa.me/${phone}?text=Hello%20${encodeURIComponent(name)},%20aapka%20room%20no%20${encodeURIComponent(room)}%20ka%20rent%20₹${rent}%20due%20hai.%20Kripya%20jald%20pay%20karein." target="_blank" title="WhatsApp Reminder" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white transition border border-emerald-500/20">
+                                <a href="https://wa.me/${phone}?text=${encodeURIComponent(waMessage)}" target="_blank" title="Send WhatsApp Reminder" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white transition border border-emerald-500/20">
                                     <i class="fa-brands fa-whatsapp text-sm"></i>
                                 </a>
-                                <button onclick="toggleStatus('${docId}', '${status}', '${name}', '${aadhar}', '${room}', '${rent}', '${dueDate}', '${phone}')" title="Toggle Status" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-white transition border border-amber-500/20">
+                                <button onclick="openPaymentModal('${docId}')" title="View & Add Payment Records" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white transition border border-indigo-500/20">
+                                    <i class="fa-solid fa-wallet text-xs"></i>
+                                </button>
+                                <button onclick="toggleStatus('${docId}', '${status}')" title="Toggle Status (Due/Advance)" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-white transition border border-amber-500/20">
                                     <i class="fa-solid fa-rotate-right text-xs"></i>
                                 </button>
                                 <button onclick="deleteTenant('${docId}')" title="Delete Tenant" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white transition border border-rose-500/20">
@@ -426,20 +472,14 @@
             }
         }
 
-        // Toggle Advance/Due
-        async function toggleStatus(docId, currentStatus, name, aadhar, room, rent, dueDate, phone) {
+        // Toggle Status
+        async function toggleStatus(docId, currentStatus) {
             const newStatus = currentStatus === 'Advance' ? 'Due' : 'Advance';
-            const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tenants/${docId}`;
+            const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tenants/${docId}?updateMask.fieldPaths=status`;
 
             const body = {
                 fields: {
-                    name: { stringValue: name },
-                    aadhar: { stringValue: aadhar },
-                    room: { stringValue: room },
-                    rent: { integerValue: Number(rent) },
-                    dueDate: { stringValue: dueDate },
-                    status: { stringValue: newStatus },
-                    phone: { stringValue: phone }
+                    status: { stringValue: newStatus }
                 }
             };
 
@@ -465,15 +505,181 @@
                 try {
                     await fetch(firestoreUrl, { 
                         method: 'DELETE',
-                        headers: {
-                            'Authorization': `Bearer ${userToken}`
-                        }
+                        headers: { 'Authorization': `Bearer ${userToken}` }
                     });
                     loadTenants();
                 } catch (err) {
                     alert("Error deleting: " + err.message);
                 }
             }
-        }    </script>
+        }
+
+        // --- PAYMENT RECORDS LOGIC ---
+
+        async function openPaymentModal(docId) {
+            activeTenantDocId = docId;
+            document.getElementById('modal-tenant-id').value = docId;
+            document.getElementById('payment-modal').classList.remove('hidden');
+            document.getElementById('p-date').valueAsDate = new Date();
+            await fetchTenantPayments(docId);
+        }
+
+        function closePaymentModal() {
+            document.getElementById('payment-modal').classList.add('hidden');
+            activeTenantDocId = null;
+            activeTenantData = null;
+            loadTenants();
+        }
+
+        async function fetchTenantPayments(docId) {
+            const listEl = document.getElementById('payment-logs-list');
+            listEl.innerHTML = `<div class='text-center text-slate-500 py-4 text-xs'>Loading payment logs...</div>`;
+
+            const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tenants/${docId}`;
+            try {
+                const res = await fetch(firestoreUrl, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                const doc = await res.json();
+                activeTenantData = doc.fields;
+
+                let payments = [];
+                if (activeTenantData.payments && activeTenantData.payments.arrayValue && activeTenantData.payments.arrayValue.values) {
+                    payments = activeTenantData.payments.arrayValue.values.map(v => {
+                        return {
+                            id: v.mapValue.fields.id.stringValue,
+                            amount: v.mapValue.fields.amount.integerValue || v.mapValue.fields.amount.stringValue,
+                            date: v.mapValue.fields.date.stringValue
+                        };
+                    });
+                }
+
+                renderPaymentLogs(payments);
+            } catch (err) {
+                listEl.innerHTML = `<div class='text-center text-rose-400 py-4 text-xs'>Failed to load payment history.</div>`;
+            }
+        }
+
+        function renderPaymentLogs(payments) {
+            const listEl = document.getElementById('payment-logs-list');
+            listEl.innerHTML = "";
+
+            if (payments.length === 0) {
+                listEl.innerHTML = `<div class='text-center text-slate-500 py-4 text-xs'>No payment logs recorded yet.</div>`;
+                return;
+            }
+
+            payments.forEach((p) => {
+                const item = `
+                    <div class='flex justify-between items-center bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs'>
+                        <div>
+                            <span class='font-bold text-emerald-400 text-sm'>₹${p.amount}</span>
+                            <span class='text-slate-400 ml-2'><i class='fa-regular fa-calendar mr-1'></i>${p.date}</span>
+                        </div>
+                        <button onclick="deletePaymentRecord('${p.id}')" class='w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white transition flex items-center justify-center'>
+                            <i class='fa-regular fa-trash-can text-[10px]'></i>
+                        </button>
+                    </div>
+                `;
+                listEl.innerHTML += item;
+            });
+        }
+
+        async function addPaymentRecord(e) {
+            e.preventDefault();
+            const amount = document.getElementById('p-amount').value;
+            const date = document.getElementById('p-date').value;
+            const paymentId = 'pay_' + Date.now();
+
+            let existingPayments = [];
+            if (activeTenantData && activeTenantData.payments && activeTenantData.payments.arrayValue && activeTenantData.payments.arrayValue.values) {
+                existingPayments = activeTenantData.payments.arrayValue.values;
+            }
+
+            const newPaymentMap = {
+                mapValue: {
+                    fields: {
+                        id: { stringValue: paymentId },
+                        amount: { integerValue: Number(amount) },
+                        date: { stringValue: date }
+                    }
+                }
+            };
+
+            existingPayments.push(newPaymentMap);
+
+            const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tenants/${activeTenantDocId}?updateMask.fieldPaths=payments`;
+
+            const body = {
+                fields: {
+                    payments: {
+                        arrayValue: { values: existingPayments }
+                    }
+                }
+            };
+
+            try {
+                const res = await fetch(firestoreUrl, {
+                    method: 'PATCH',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}` 
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if(res.ok) {
+                    document.getElementById('p-amount').value = '';
+                    await fetchTenantPayments(activeTenantDocId);
+                } else {
+                    alert("Error adding payment record.");
+                }
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
+        }
+
+        async function deletePaymentRecord(paymentId) {
+            if(!confirm("Delete this payment log?")) return;
+
+            let existingPayments = [];
+            if (activeTenantData && activeTenantData.payments && activeTenantData.payments.arrayValue && activeTenantData.payments.arrayValue.values) {
+                existingPayments = activeTenantData.payments.arrayValue.values;
+            }
+
+            const updatedPayments = existingPayments.filter(v => {
+                return v.mapValue.fields.id.stringValue !== paymentId;
+            });
+
+            const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tenants/${activeTenantDocId}?updateMask.fieldPaths=payments`;
+
+            const body = {
+                fields: {
+                    payments: {
+                        arrayValue: { values: updatedPayments }
+                    }
+                }
+            };
+
+            try {
+                const res = await fetch(firestoreUrl, {
+                    method: 'PATCH',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}` 
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if(res.ok) {
+                    await fetchTenantPayments(activeTenantDocId);
+                } else {
+                    alert("Error deleting payment log.");
+                }
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
+        }
+    </script>
 </body>
 </html>
