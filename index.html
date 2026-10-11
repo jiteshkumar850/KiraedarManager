@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Tenant Manager | Smart Auto-Due Portal</title>
+    <title>Nexus Tenant Manager | Smart Analytics Portal</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -22,8 +22,8 @@
     <style>
         @media print {
             body * { visibility: hidden; }
-            #receipt-print-area, #receipt-print-area * { visibility: visible; }
-            #receipt-print-area { position: absolute; left: 0; top: 0; width: 100%; color: black; background: white; padding: 20px; }
+            #report-modal, #report-modal *, #receipt-print-area, #receipt-print-area * { visibility: visible; }
+            #report-modal, #receipt-print-area { position: absolute; left: 0; top: 0; width: 100%; color: black; background: white; padding: 20px; }
         }
     </style>
 </head>
@@ -40,7 +40,7 @@
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
                 <h2 id="auth-title" class="text-2xl font-bold tracking-tight text-white">Admin Portal Login</h2>
-                <p class="text-sm text-slate-400 mt-1">Smart Tenant & Dynamic Rent Management</p>
+                <p class="text-sm text-slate-400 mt-1">Smart Tenant, Rent & Monthly Reports Portal</p>
             </div>
 
             <div class="space-y-5 mt-6">
@@ -82,14 +82,22 @@
                     </div>
                     <div>
                         <span class="text-lg font-bold text-white tracking-tight block">NexusSpaces</span>
-                        <span class="text-xs text-slate-400 font-medium">Smart Auto Monthly Due Scheduler</span>
+                        <span class="text-xs text-slate-400 font-medium">Tenant & Rent Analytics System</span>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-3 sm:space-x-4">
                     <div class="hidden sm:flex items-center space-x-2 bg-slate-900 border border-slate-800 px-3.5 py-2 rounded-xl">
                         <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                         <span id="user-email" class="text-xs font-medium text-slate-300"></span>
                     </div>
+                    
+                    <!-- 📊 Monthly Report Button -->
+                    <button onclick="openReportModal()" class="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 font-semibold px-4 py-2 rounded-xl text-xs transition flex items-center space-x-2">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Monthly Reports</span>
+                    </button>
+
+                    <!-- Logout Button -->
                     <button onclick="logout()" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-medium px-4 py-2 rounded-xl text-xs transition flex items-center space-x-2">
                         <i class="fa-solid fa-power-off"></i>
                         <span>Logout</span>
@@ -134,16 +142,20 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 
-                <!-- Add Tenant Form -->
+                <!-- Add / Edit Tenant Form -->
                 <div class="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 sm:p-7 shadow-xl backdrop-blur-md lg:col-span-1">
-                    <div class="flex items-center space-x-3 mb-6">
-                        <div class="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl border border-indigo-500/20">
-                            <i class="fa-solid fa-user-plus text-base"></i>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl border border-indigo-500/20">
+                                <i id="form-icon" class="fa-solid fa-user-plus text-base"></i>
+                            </div>
+                            <h3 id="form-title" class="font-bold text-white text-base">Register New Tenant</h3>
                         </div>
-                        <h3 class="font-bold text-white text-base">Register New Tenant</h3>
+                        <button id="cancel-edit-btn" onclick="resetForm()" class="hidden text-xs text-rose-400 hover:text-rose-300 font-semibold">Cancel Edit</button>
                     </div>
 
-                    <form id="tenant-form" onsubmit="addTenant(event)" class="space-y-4">
+                    <form id="tenant-form" onsubmit="handleTenantSubmit(event)" class="space-y-4">
+                        <input type="hidden" id="editing-doc-id" value="">
                         <div>
                             <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Full Name</label>
                             <input type="text" id="t-name" placeholder="e.g. Rahul Sharma" required class="w-full px-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition text-sm">
@@ -163,12 +175,11 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Monthly Rent Due Date (Day)</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Monthly Due Date</label>
                             <input type="date" id="t-duedate" required class="w-full px-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 transition text-sm">
-                            <p class="text-[10px] text-slate-500 mt-1">*System will automatically calculate due date every month based on this day.</p>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Initial Payment Status</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Payment Status</label>
                             <select id="t-status" class="w-full px-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 transition text-sm">
                                 <option value="Due" class="bg-slate-900">Due / Pending</option>
                                 <option value="Advance" class="bg-slate-900">Advance Paid</option>
@@ -178,7 +189,7 @@
                             <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">WhatsApp Mobile No.</label>
                             <input type="text" id="t-phone" placeholder="919876543210" required class="w-full px-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition text-sm">
                         </div>
-                        <button type="submit" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/25 transition text-sm mt-2">
+                        <button type="submit" id="submit-btn" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/25 transition text-sm mt-2">
                             <i class="fa-solid fa-floppy-disk mr-2"></i> Save Tenant Record
                         </button>
                     </form>
@@ -191,7 +202,7 @@
                             <div class="p-2.5 bg-violet-500/10 text-violet-400 rounded-xl border border-violet-500/20">
                                 <i class="fa-solid fa-list-check text-base"></i>
                             </div>
-                            <h3 class="font-bold text-white text-base">Active Tenants & Live Due Calendar</h3>
+                            <h3 class="font-bold text-white text-base">Active Tenants Directory</h3>
                         </div>
                         <button onclick="loadTenants()" class="text-slate-400 hover:text-white text-xs font-semibold flex items-center space-x-1.5 bg-slate-800/50 hover:bg-slate-800 px-3 py-2 rounded-xl transition border border-slate-700/50">
                             <i class="fa-solid fa-rotate"></i>
@@ -208,7 +219,7 @@
                                     <th class="py-4 px-6 font-semibold">Aadhar</th>
                                     <th class="py-4 px-6 font-semibold">Rent</th>
                                     <th class="py-4 px-6 font-semibold">Auto Current Month Due</th>
-                                    <th class="py-4 px-6 font-semibold text-center">Payment History & Actions</th>
+                                    <th class="py-4 px-6 font-semibold text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="tenant-list" class="divide-y divide-slate-800/60 text-slate-300 text-sm">
@@ -219,6 +230,82 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- 📈 MONTHLY REPORT MODAL -->
+    <div id="report-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl relative space-y-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl border border-indigo-500/20">
+                        <i class="fa-solid fa-chart-line text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white">Monthly Analytics & Entry Report</h3>
+                        <p class="text-xs text-slate-400">Track payment records & new tenant entry logs</p>
+                    </div>
+                </div>
+                <button onclick="closeReportModal()" class="w-8 h-8 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Filter Month & Year Control -->
+            <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+                <div class="flex items-center space-x-3">
+                    <label class="text-xs font-semibold uppercase text-slate-400">Select Month:</label>
+                    <input type="month" id="report-month-filter" onchange="generateMonthlyReport()" class="px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="downloadReportCSV()" class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 font-semibold px-3 py-2 rounded-xl text-xs transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-file-csv"></i>
+                        <span>Export CSV</span>
+                    </button>
+                    <button onclick="window.print()" class="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 font-semibold px-3 py-2 rounded-xl text-xs transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Print Report</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Report Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-slate-950/40 p-4 rounded-2xl border border-slate-800">
+                    <p class="text-[10px] font-semibold uppercase text-slate-400">Selected Month Collection</p>
+                    <h4 id="report-total-amount" class="text-xl font-bold text-emerald-400 mt-1">₹0</h4>
+                </div>
+                <div class="bg-slate-950/40 p-4 rounded-2xl border border-slate-800">
+                    <p class="text-[10px] font-semibold uppercase text-slate-400">Total Transactions</p>
+                    <h4 id="report-total-tx" class="text-xl font-bold text-white mt-1">0</h4>
+                </div>
+                <div class="bg-slate-950/40 p-4 rounded-2xl border border-slate-800">
+                    <p class="text-[10px] font-semibold uppercase text-slate-400">New Tenants Added</p>
+                    <h4 id="report-new-tenants" class="text-xl font-bold text-indigo-400 mt-1">0</h4>
+                </div>
+            </div>
+
+            <!-- Report Details Table -->
+            <div class="space-y-3">
+                <h4 class="text-xs font-bold uppercase text-slate-300 tracking-wider">Payment Transactions Breakdown</h4>
+                <div class="overflow-x-auto rounded-2xl border border-slate-800">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                                <th class="py-3 px-4 font-semibold">Date Paid</th>
+                                <th class="py-3 px-4 font-semibold">Tenant Name</th>
+                                <th class="py-3 px-4 font-semibold">Room No</th>
+                                <th class="py-3 px-4 font-semibold">Amount</th>
+                                <th class="py-3 px-4 font-semibold">Payment Mode</th>
+                                <th class="py-3 px-4 font-semibold">Note / Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-table-body" class="divide-y divide-slate-800/60 text-slate-300">
+                            <!-- Dynamic Report Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Payment History Modal -->
@@ -234,7 +321,6 @@
                 </button>
             </div>
 
-            <!-- Record New Payment Form -->
             <form id="payment-form" onsubmit="addPaymentRecord(event)" class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800 space-y-3">
                 <div class="text-xs font-semibold uppercase text-indigo-400 tracking-wider"><i class="fa-solid fa-receipt mr-1"></i> Add Rent Payment Log</div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -264,7 +350,6 @@
                 </div>
             </form>
 
-            <!-- Detailed History Table -->
             <div class="space-y-2">
                 <div class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Previous Transactions</div>
                 <div class="max-h-60 overflow-y-auto space-y-2 pr-1" id="payment-logs-list">
@@ -304,6 +389,8 @@
         let isSignUp = false;
         let activeTenantDocId = null;
         let activeTenantData = null;
+        let tenantCache = {};
+        let allTenantsRawData = [];
 
         window.onload = () => {
             if (userToken) {
@@ -376,9 +463,10 @@
             loadTenants();
         }
 
-        // Add Tenant
-        async function addTenant(e) {
+        // Add or Edit Tenant Submit Handler
+        async function handleTenantSubmit(e) {
             e.preventDefault();
+            const editingId = document.getElementById('editing-doc-id').value;
             const name = document.getElementById('t-name').value;
             const aadhar = document.getElementById('t-aadhar').value;
             const room = document.getElementById('t-room').value;
@@ -387,43 +475,116 @@
             const status = document.getElementById('t-status').value;
             const phone = document.getElementById('t-phone').value;
 
-            const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tenants`;
+            if (editingId) {
+                // Update Existing Tenant
+                const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tenants/${editingId}?updateMask.fieldPaths=name&updateMask.fieldPaths=aadhar&updateMask.fieldPaths=room&updateMask.fieldPaths=rent&updateMask.fieldPaths=dueDate&updateMask.fieldPaths=status&updateMask.fieldPaths=phone`;
 
-            const body = {
-                fields: {
-                    name: { stringValue: name },
-                    aadhar: { stringValue: aadhar },
-                    room: { stringValue: room },
-                    rent: { integerValue: Number(rent) },
-                    dueDate: { stringValue: dueDate },
-                    status: { stringValue: status },
-                    phone: { stringValue: phone },
-                    payments: { arrayValue: { values: [] } }
-                }
-            };
+                const body = {
+                    fields: {
+                        name: { stringValue: name },
+                        aadhar: { stringValue: aadhar },
+                        room: { stringValue: room },
+                        rent: { integerValue: Number(rent) },
+                        dueDate: { stringValue: dueDate },
+                        status: { stringValue: status },
+                        phone: { stringValue: phone }
+                    }
+                };
 
-            try {
-                const res = await fetch(firestoreUrl, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${userToken}` 
-                    },
-                    body: JSON.stringify(body)
-                });
-                if(res.ok) {
-                    document.getElementById('tenant-form').reset();
-                    loadTenants();
-                } else {
-                    const errData = await res.json();
-                    alert("Error saving record: " + JSON.stringify(errData));
+                try {
+                    const res = await fetch(firestoreUrl, {
+                        method: 'PATCH',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${userToken}` 
+                        },
+                        body: JSON.stringify(body)
+                    });
+                    if(res.ok) {
+                        resetForm();
+                        loadTenants();
+                        alert("Tenant updated successfully!");
+                    } else {
+                        const errData = await res.json();
+                        alert("Error updating: " + JSON.stringify(errData));
+                    }
+                } catch (err) {
+                    alert("Error: " + err.message);
                 }
-            } catch (err) {
-                alert("Error: " + err.message);
+
+            } else {
+                // Add New Tenant
+                const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tenants`;
+
+                const createdDate = new Date().toISOString().split('T')[0];
+
+                const body = {
+                    fields: {
+                        name: { stringValue: name },
+                        aadhar: { stringValue: aadhar },
+                        room: { stringValue: room },
+                        rent: { integerValue: Number(rent) },
+                        dueDate: { stringValue: dueDate },
+                        status: { stringValue: status },
+                        phone: { stringValue: phone },
+                        createdDate: { stringValue: createdDate },
+                        payments: { arrayValue: { values: [] } }
+                    }
+                };
+
+                try {
+                    const res = await fetch(firestoreUrl, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${userToken}` 
+                        },
+                        body: JSON.stringify(body)
+                    });
+                    if(res.ok) {
+                        resetForm();
+                        loadTenants();
+                        alert("Tenant added successfully!");
+                    } else {
+                        const errData = await res.json();
+                        alert("Error saving record: " + JSON.stringify(errData));
+                    }
+                } catch (err) {
+                    alert("Error: " + err.message);
+                }
             }
         }
 
-        // 💡 AUTOMATIC DYNAMIC MONTHLY DUE DATE CALCULATOR
+        function editTenant(docId) {
+            const t = tenantCache[docId];
+            if (!t) return;
+
+            document.getElementById('editing-doc-id').value = docId;
+            document.getElementById('t-name').value = t.name;
+            document.getElementById('t-aadhar').value = t.aadhar;
+            document.getElementById('t-room').value = t.room;
+            document.getElementById('t-rent').value = t.rent;
+            document.getElementById('t-duedate').value = t.dueDate;
+            document.getElementById('t-status').value = t.status;
+            document.getElementById('t-phone').value = t.phone;
+
+            document.getElementById('form-title').innerText = "Edit Tenant Details";
+            document.getElementById('form-icon').className = "fa-solid fa-user-pen text-base";
+            document.getElementById('submit-btn').innerHTML = `<i class="fa-solid fa-check mr-2"></i> Update Tenant Details`;
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('editing-doc-id').value = "";
+            document.getElementById('tenant-form').reset();
+            document.getElementById('form-title').innerText = "Register New Tenant";
+            document.getElementById('form-icon').className = "fa-solid fa-user-plus text-base";
+            document.getElementById('submit-btn').innerHTML = `<i class="fa-solid fa-floppy-disk mr-2"></i> Save Tenant Record`;
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+        }
+
         function calculateCurrentMonthDue(baseDateStr, status) {
             if (status === 'Advance') {
                 return {
@@ -437,13 +598,9 @@
             const baseDate = new Date(baseDateStr);
             const dueDay = baseDate.getDate();
 
-            // Calculate current month's due date
             let currentDue = new Date(today.getFullYear(), today.getMonth(), dueDay);
-
-            // Format date YYYY-MM-DD
             const formattedDueDate = currentDue.getFullYear() + '-' + String(currentDue.getMonth() + 1).padStart(2, '0') + '-' + String(currentDue.getDate()).padStart(2, '0');
 
-            // Compare with current date
             const todayReset = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
             if (currentDue < todayReset) {
@@ -470,7 +627,7 @@
         // Load Tenants
         async function loadTenants() {
             const tbody = document.getElementById('tenant-list');
-            tbody.innerHTML = `<tr><td colspan='6' class='py-10 text-center text-slate-500'><i class="fa-solid fa-spinner fa-spin mr-2"></i> Syncing monthly calendars...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan='6' class='py-10 text-center text-slate-500'><i class="fa-solid fa-spinner fa-spin mr-2"></i> Syncing directory...</td></tr>`;
 
             const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tenants`;
 
@@ -480,6 +637,8 @@
                 });
                 const data = await res.json();
                 tbody.innerHTML = "";
+                tenantCache = {};
+                allTenantsRawData = data.documents || [];
 
                 if (!data.documents || data.documents.length === 0) {
                     tbody.innerHTML = `<tr><td colspan='6' class='py-12 text-center text-slate-500 font-medium'>No tenant records found.</td></tr>`;
@@ -505,10 +664,11 @@
                     const status = fields.status ? fields.status.stringValue : 'Due';
                     const phone = fields.phone ? fields.phone.stringValue : '';
 
+                    tenantCache[docId] = { name, aadhar, room, rent, dueDate: baseDueDate, status, phone };
+
                     totalCount++;
                     totalRevenue += Number(rent);
 
-                    // Dynamic Auto Due Calculation
                     const dueInfo = calculateCurrentMonthDue(baseDueDate, status);
                     if(dueInfo.isOverdue) overdueCount++;
 
@@ -532,6 +692,9 @@
                                 </a>
                                 <button onclick="openPaymentModal('${docId}')" title="View Detailed Payment History" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white transition border border-indigo-500/20">
                                     <i class="fa-solid fa-receipt text-xs"></i>
+                                </button>
+                                <button onclick="editTenant('${docId}')" title="Edit Tenant Details" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500 hover:text-white transition border border-cyan-500/20">
+                                    <i class="fa-solid fa-pen text-xs"></i>
                                 </button>
                                 <button onclick="toggleStatus('${docId}', '${status}')" title="Toggle Status (Due/Advance)" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-white transition border border-amber-500/20">
                                     <i class="fa-solid fa-rotate-right text-xs"></i>
@@ -597,7 +760,111 @@
             }
         }
 
-        // PAYMENT HISTORY & LOGIC
+        // --- 📊 MONTHLY REPORT SYSTEM LOGIC ---
+
+        function openReportModal() {
+            document.getElementById('report-modal').classList.remove('hidden');
+            const today = new Date();
+            const currentMonthStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+            document.getElementById('report-month-filter').value = currentMonthStr;
+            generateMonthlyReport();
+        }
+
+        function closeReportModal() {
+            document.getElementById('report-modal').classList.add('hidden');
+        }
+
+        function generateMonthlyReport() {
+            const selectedMonth = document.getElementById('report-month-filter').value; // e.g. "2026-10"
+            const tbody = document.getElementById('report-table-body');
+            tbody.innerHTML = "";
+
+            if(!selectedMonth) return;
+
+            let totalAmount = 0;
+            let totalTxCount = 0;
+            let newTenantsCount = 0;
+
+            allTenantsRawData.forEach((doc) => {
+                const fields = doc.fields;
+                const tenantName = fields.name ? fields.name.stringValue : '';
+                const roomNo = fields.room ? fields.room.stringValue : '';
+                const createdDate = fields.createdDate ? fields.createdDate.stringValue : '';
+
+                if(createdDate && createdDate.startsWith(selectedMonth)) {
+                    newTenantsCount++;
+                }
+
+                if (fields.payments && fields.payments.arrayValue && fields.payments.arrayValue.values) {
+                    fields.payments.arrayValue.values.forEach(v => {
+                        const pf = v.mapValue.fields;
+                        const pDate = pf.date ? pf.date.stringValue : '';
+                        const pAmount = pf.amount ? (pf.amount.integerValue || pf.amount.stringValue) : 0;
+                        const pMode = pf.mode ? pf.mode.stringValue : 'Cash';
+                        const pNote = pf.note ? pf.note.stringValue : '-';
+
+                        if (pDate && pDate.startsWith(selectedMonth)) {
+                            totalAmount += Number(pAmount);
+                            totalTxCount++;
+
+                            const row = `
+                                <tr class="hover:bg-slate-900/40 transition">
+                                    <td class="py-3 px-4 font-mono">${pDate}</td>
+                                    <td class="py-3 px-4 font-bold text-white">${tenantName}</td>
+                                    <td class="py-3 px-4">${roomNo}</td>
+                                    <td class="py-3 px-4 font-bold text-emerald-400">₹${pAmount}</td>
+                                    <td class="py-3 px-4"><span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full text-[10px]">${pMode}</span></td>
+                                    <td class="py-3 px-4 text-slate-400">${pNote}</td>
+                                </tr>
+                            `;
+                            tbody.innerHTML += row;
+                        }
+                    });
+                }
+            });
+
+            if (totalTxCount === 0) {
+                tbody.innerHTML = `<tr><td colspan='6' class='py-8 text-center text-slate-500'>No payment transactions recorded for ${selectedMonth}.</td></tr>`;
+            }
+
+            document.getElementById('report-total-amount').innerText = "₹" + totalAmount.toLocaleString('en-IN');
+            document.getElementById('report-total-tx').innerText = totalTxCount;
+            document.getElementById('report-new-tenants').innerText = newTenantsCount;
+        }
+
+        function downloadReportCSV() {
+            const selectedMonth = document.getElementById('report-month-filter').value;
+            let csv = "Date Paid,Tenant Name,Room Number,Amount Paid,Payment Mode,Note\n";
+
+            allTenantsRawData.forEach((doc) => {
+                const fields = doc.fields;
+                const tenantName = fields.name ? fields.name.stringValue : '';
+                const roomNo = fields.room ? fields.room.stringValue : '';
+
+                if (fields.payments && fields.payments.arrayValue && fields.payments.arrayValue.values) {
+                    fields.payments.arrayValue.values.forEach(v => {
+                        const pf = v.mapValue.fields;
+                        const pDate = pf.date ? pf.date.stringValue : '';
+                        const pAmount = pf.amount ? (pf.amount.integerValue || pf.amount.stringValue) : 0;
+                        const pMode = pf.mode ? pf.mode.stringValue : 'Cash';
+                        const pNote = pf.note ? pf.note.stringValue : '-';
+
+                        if (pDate && pDate.startsWith(selectedMonth)) {
+                            csv += `"${pDate}","${tenantName}","${roomNo}","${pAmount}","${pMode}","${pNote}"\n`;
+                        }
+                    });
+                }
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `Monthly_Rent_Report_${selectedMonth}.csv`);
+            a.click();
+        }
+
+        // --- PAYMENT HISTORY & LOGIC ---
 
         async function openPaymentModal(docId) {
             activeTenantDocId = docId;
