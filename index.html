@@ -216,16 +216,8 @@
     <!-- Firebase API Script Logic (Direct - No Setup Required!) -->
     <script>
         // 🔑 BAS YAHAN APNI FIREBASE CONFIG DETAILS BADLEIN:
-    const firebaseConfig = {
-  apiKey: "AIzaSyAQXIiFPpZ2-VpoEHWK7lyayjJuxA58FPE",
-  authDomain: "kiraedar-manager.firebaseapp.com",
-  projectId: "kiraedar-manager",
-  storageBucket: "kiraedar-manager.firebasestorage.app",
-  messagingSenderId: "549691331995",
-  appId: "1:549691331995:web:60266f0df1a88599a9bd3e",
-  measurementId: "G-E70WNPXJ1K"
-};
-
+        const API_KEY = "AIzaSyAQXIiFPpZ2-VpoEHWK7lyayjJuxA58FPE";
+        const PROJECT_ID = "kiraedar-manager";
 
         let userToken = localStorage.getItem('user_token') || null;
         let currentUserEmail = localStorage.getItem('user_email') || null;
@@ -398,4 +390,76 @@
                                 <div class="font-semibold text-white">${name}</div>
                                 <div class="text-xs text-slate-400"><i class="fa-regular fa-phone mr-1"></i>${phone}</div>
                             </td>
-                            <td class="py-
+                            <td class="py-4 px-6 font-mono text-xs text-slate-400">${aadhar}</td>
+                            <td class="py-4 px-6 font-semibold text-white">₹${rent}</td>
+                            <td class="py-4 px-6">${dueDisplay}</td>
+                            <td class="py-4 px-6 text-center space-x-1.5">
+                                <a href="https://wa.me/${phone}?text=Hello%20${encodeURIComponent(name)},%20aapka%20room%20no%20${encodeURIComponent(room)}%20ka%20rent%20₹${rent}%20due%20hai.%20Kripya%20jald%20pay%20karein." target="_blank" title="WhatsApp Reminder" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white transition border border-emerald-500/20">
+                                    <i class="fa-brands fa-whatsapp text-sm"></i>
+                                </a>
+                                <button onclick="toggleStatus('${docId}', '${status}', '${name}', '${aadhar}', '${room}', '${rent}', '${dueDate}', '${phone}')" title="Toggle Status" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-white transition border border-amber-500/20">
+                                    <i class="fa-solid fa-rotate-right text-xs"></i>
+                                </button>
+                                <button onclick="deleteTenant('${docId}')" title="Delete Tenant" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white transition border border-rose-500/20">
+                                    <i class="fa-regular fa-trash-can text-xs"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+
+                document.getElementById('stat-total').innerText = totalCount;
+                document.getElementById('stat-revenue').innerText = "₹" + totalRevenue.toLocaleString('en-IN');
+                document.getElementById('stat-advance').innerText = advanceCount;
+
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = `<tr><td colspan='6' class='py-10 text-center text-rose-400'>Error loading records.</td></tr>`;
+            }
+        }
+
+        // Toggle Advance/Due
+        async function toggleStatus(docId, currentStatus, name, aadhar, room, rent, dueDate, phone) {
+            const newStatus = currentStatus === 'Advance' ? 'Due' : 'Advance';
+            const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tenants/${docId}`;
+
+            const body = {
+                fields: {
+                    name: { stringValue: name },
+                    aadhar: { stringValue: aadhar },
+                    room: { stringValue: room },
+                    rent: { integerValue: rent },
+                    dueDate: { stringValue: dueDate },
+                    status: { stringValue: newStatus },
+                    phone: { stringValue: phone }
+                }
+            };
+
+            try {
+                await fetch(firestoreUrl, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                loadTenants();
+            } catch (err) {
+                alert("Error updating status: " + err.message);
+            }
+        }
+
+        // Delete Tenant
+        async function deleteTenant(docId) {
+            if (confirm("Are you sure you want to delete this tenant record?")) {
+                const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tenants/${docId}`;
+                try {
+                    await fetch(firestoreUrl, { method: 'DELETE' });
+                    loadTenants();
+                } catch (err) {
+                    alert("Error deleting: " + err.message);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
