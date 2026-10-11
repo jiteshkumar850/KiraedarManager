@@ -296,6 +296,7 @@
         }
 
         // Add Tenant
+// Add Tenant
         async function addTenant(e) {
             e.preventDefault();
             const name = document.getElementById('t-name').value;
@@ -313,7 +314,7 @@
                     name: { stringValue: name },
                     aadhar: { stringValue: aadhar },
                     room: { stringValue: room },
-                    rent: { integerValue: rent },
+                    rent: { integerValue: Number(rent) },
                     dueDate: { stringValue: dueDate },
                     status: { stringValue: status },
                     phone: { stringValue: phone }
@@ -323,7 +324,10 @@
             try {
                 const res = await fetch(firestoreUrl, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}` // 👈 Yeh line zaroori hai
+                    },
                     body: JSON.stringify(body)
                 });
                 if(res.ok) {
@@ -346,7 +350,11 @@
             const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tenants`;
 
             try {
-                const res = await fetch(firestoreUrl);
+                const res = await fetch(firestoreUrl, {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}` // 👈 Token passed here too
+                    }
+                });
                 const data = await res.json();
                 tbody.innerHTML = "";
 
@@ -378,7 +386,6 @@
                     totalRevenue += Number(rent);
                     if(status === 'Advance') advanceCount++;
 
-                    // Advance Logic
                     const dueDisplay = status === 'Advance' 
                         ? `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-circle-check mr-1.5 text-[10px]"></i> Advance Paid (No Due)</span>` 
                         : `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20"><i class="fa-solid fa-clock mr-1.5 text-[10px]"></i> Due: ${dueDate}</span>`;
@@ -429,7 +436,7 @@
                     name: { stringValue: name },
                     aadhar: { stringValue: aadhar },
                     room: { stringValue: room },
-                    rent: { integerValue: rent },
+                    rent: { integerValue: Number(rent) },
                     dueDate: { stringValue: dueDate },
                     status: { stringValue: newStatus },
                     phone: { stringValue: phone }
@@ -439,7 +446,10 @@
             try {
                 await fetch(firestoreUrl, {
                     method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}` 
+                    },
                     body: JSON.stringify(body)
                 });
                 loadTenants();
@@ -453,13 +463,17 @@
             if (confirm("Are you sure you want to delete this tenant record?")) {
                 const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tenants/${docId}`;
                 try {
-                    await fetch(firestoreUrl, { method: 'DELETE' });
+                    await fetch(firestoreUrl, { 
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${userToken}`
+                        }
+                    });
                     loadTenants();
                 } catch (err) {
                     alert("Error deleting: " + err.message);
                 }
             }
-        }
-    </script>
+        }    </script>
 </body>
 </html>
