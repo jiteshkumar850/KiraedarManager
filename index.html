@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Tenant Manager | Smart Analytics Portal</title>
+    <title>Nexus Tenant Manager | Smart Portal</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -40,7 +40,7 @@
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
                 <h2 id="auth-title" class="text-2xl font-bold tracking-tight text-white">Admin Portal Login</h2>
-                <p class="text-sm text-slate-400 mt-1">Smart Tenant, Rent & Monthly Reports Portal</p>
+                <p class="text-sm text-slate-400 mt-1">Smart Tenant & Rent Management System</p>
             </div>
 
             <div class="space-y-5 mt-6">
@@ -85,16 +85,18 @@
                         <span class="text-xs text-slate-400 font-medium">Tenant & Rent Analytics System</span>
                     </div>
                 </div>
+
+                <!-- Right Header: Email + Reports Button + Logout -->
                 <div class="flex items-center space-x-3 sm:space-x-4">
                     <div class="hidden sm:flex items-center space-x-2 bg-slate-900 border border-slate-800 px-3.5 py-2 rounded-xl">
                         <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                         <span id="user-email" class="text-xs font-medium text-slate-300"></span>
                     </div>
                     
-                    <!-- 📊 Monthly Report Button -->
-                    <button onclick="openReportModal()" class="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 font-semibold px-4 py-2 rounded-xl text-xs transition flex items-center space-x-2">
-                        <i class="fa-solid fa-chart-pie"></i>
-                        <span>Monthly Reports</span>
+                    <!-- 📊 Reports Button Right Next to Email -->
+                    <button onclick="openReportModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-xl text-xs transition flex items-center space-x-2 shadow-lg shadow-indigo-600/20">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Reports</span>
                     </button>
 
                     <!-- Logout Button -->
@@ -232,7 +234,7 @@
         </main>
     </div>
 
-    <!-- 📈 MONTHLY REPORT MODAL -->
+    <!-- 📊 MONTHLY REPORTS MODAL -->
     <div id="report-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl relative space-y-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-800 pb-4">
@@ -250,7 +252,7 @@
                 </button>
             </div>
 
-            <!-- Filter Month & Year Control -->
+            <!-- Filter Controls -->
             <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
                 <div class="flex items-center space-x-3">
                     <label class="text-xs font-semibold uppercase text-slate-400">Select Month:</label>
@@ -515,7 +517,6 @@
             } else {
                 // Add New Tenant
                 const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/tenants`;
-
                 const createdDate = new Date().toISOString().split('T')[0];
 
                 const body = {
@@ -676,6 +677,7 @@
                         ? `Hello ${name}, aapka room no ${room} ka rent advance paid hai. Dhanyawad!`
                         : `Hello ${name}, aapka room no ${room} ka rent ₹${rent} due hai (Due Date: ${dueInfo.dateStr}). Kripya jald pay karein.`;
 
+                    // ✏️ Edit Button & Delete Button side by side in Actions column
                     const row = `
                         <tr class="hover:bg-slate-900/40 transition">
                             <td class="py-4 px-6 font-bold text-white">${room}</td>
@@ -693,12 +695,16 @@
                                 <button onclick="openPaymentModal('${docId}')" title="View Detailed Payment History" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white transition border border-indigo-500/20">
                                     <i class="fa-solid fa-receipt text-xs"></i>
                                 </button>
-                                <button onclick="editTenant('${docId}')" title="Edit Tenant Details" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500 hover:text-white transition border border-cyan-500/20">
-                                    <i class="fa-solid fa-pen text-xs"></i>
-                                </button>
                                 <button onclick="toggleStatus('${docId}', '${status}')" title="Toggle Status (Due/Advance)" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-white transition border border-amber-500/20">
                                     <i class="fa-solid fa-rotate-right text-xs"></i>
                                 </button>
+
+                                <!-- ✏️ EDIT BUTTON RIGHT BEFORE DELETE -->
+                                <button onclick="editTenant('${docId}')" title="Edit Tenant Details" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500 hover:text-white transition border border-cyan-500/20">
+                                    <i class="fa-solid fa-pen text-xs"></i>
+                                </button>
+
+                                <!-- 🗑️ DELETE BUTTON -->
                                 <button onclick="deleteTenant('${docId}')" title="Delete Tenant" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white transition border border-rose-500/20">
                                     <i class="fa-regular fa-trash-can text-xs"></i>
                                 </button>
@@ -760,7 +766,7 @@
             }
         }
 
-        // --- 📊 MONTHLY REPORT SYSTEM LOGIC ---
+        // MONTHLY REPORTS LOGIC
 
         function openReportModal() {
             document.getElementById('report-modal').classList.remove('hidden');
@@ -775,7 +781,7 @@
         }
 
         function generateMonthlyReport() {
-            const selectedMonth = document.getElementById('report-month-filter').value; // e.g. "2026-10"
+            const selectedMonth = document.getElementById('report-month-filter').value;
             const tbody = document.getElementById('report-table-body');
             tbody.innerHTML = "";
 
@@ -864,7 +870,7 @@
             a.click();
         }
 
-        // --- PAYMENT HISTORY & LOGIC ---
+        // PAYMENT HISTORY LOGIC
 
         async function openPaymentModal(docId) {
             activeTenantDocId = docId;
