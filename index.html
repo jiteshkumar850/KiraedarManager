@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tenant Management System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // TODO: Yahan apni Firebase Project ki configuration dalein
+const firebaseConfig = {
+  apiKey: "AIzaSyAQXIiFPpZ2-VpoEHWK7lyayjJuxA58FPE",
+  authDomain: "kiraedar-manager.firebaseapp.com",
+  projectId: "kiraedar-manager",
+  storageBucket: "kiraedar-manager.firebasestorage.app",
+  messagingSenderId: "549691331995",
+  appId: "1:549691331995:web:60266f0df1a88599a9bd3e",
+  measurementId: "G-E70WNPXJ1K"
+};
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Expose functions globally for UI
+        window.auth = auth;
+        window.db = db;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.signOut = signOut;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.getDocs = getDocs;
+        window.deleteDoc = deleteDoc;
+        window.doc = doc;
+        window.updateDoc = updateDoc;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('dashboard-section').classList.remove('hidden');
+                loadTenants();
+            } else {
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('dashboard-section').classList.add('hidden');
+            }
+        });
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- Auth Section (Login / Signup) -->
+    <div id="auth-section" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-md w-96">
+            <h2 id="auth-title" class="text-2xl font-bold mb-6 text-center text-blue-600">Tenant Login</h2>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                <input type="email" id="email" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                <input type="password" id="password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <button onclick="handleAuth()" id="auth-btn" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition">Login</button>
+            <p class="mt-4 text-center text-sm text-gray-600">
+                <span id="toggle-text">Account nahi hai?</span> 
+                <button onclick="toggleAuthMode()" class="text-blue-600 font-bold hover:underline" id="toggle-btn">Sign Up karein</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboard-section" class="hidden container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Tenant Management Dashboard</h1>
+            <button onclick="window.signOut(window.auth)" class="bg-red-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-600 transition">Logout</button>
+        </div>
+
+        <!-- Add Tenant Form -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-xl font-bold mb-4 text-gray-700">Add New Tenant</h2>
+            <form id="tenant-form" onsubmit="addTenant(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input type="text" id="t-name" placeholder="Tenant Name" required class="px-3 py-2 border rounded-lg">
+                <input type="text" id="t-aadhar" placeholder="Aadhar Card Number" required class="px-3 py-2 border rounded-lg">
+                <input type="text" id="t-room" placeholder="Room Number" required class="px-3 py-2 border rounded-lg">
+                <input type="number" id="t-rent" placeholder="Rent Amount (₹)" required class="px-3 py-2 border rounded-lg">
+                <input type="date" id="t-duedate" required class="px-3 py-2 border rounded-lg">
+                <select id="t-status" class="px-3 py-2 border rounded-lg">
+                    <option value="Due">Due / Pending</option>
+                    <option value="Advance">Advance Paid</option>
+                </select>
+                <input type="text" id="t-phone" placeholder="WhatsApp Phone (e.g. 919876543210)" required class="px-3 py-2 border rounded-lg md:col-span-3">
+                <button type="submit" class="bg-green-600 text-white py-2 rounded-lg font-bold hover:bg-green-700 transition md:col-span-3">Save Tenant</button>
+            </form>
+        </div>
+
+        <!-- Tenant List Table -->
+        <div class="bg-white rounded-lg shadow-md overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-700 uppercase text-sm">
+                        <th class="py-3 px-4">Room</th>
+                        <th class="py-3 px-4">Name</th>
+                        <th class="py-3 px-4">Aadhar</th>
+                        <th class="py-3 px-4">Rent</th>
+                        <th class="py-3 px-4">Due Date / Status</th>
+                        <th class="py-3 px-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tenant-list" class="text-gray-600 divide-y divide-gray-200">
+                    <!-- Dynamic Rows -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Application Logic Script -->
+    <script>
+        let isSignUp = false;
+
+        function toggleAuthMode() {
+            isSignUp = !isSignUp;
+            document.getElementById('auth-title').innerText = isSignUp ? "Tenant Sign Up" : "Tenant Login";
+            document.getElementById('auth-btn').innerText = isSignUp ? "Sign Up" : "Login";
+            document.getElementById('toggle-text').innerText = isSignUp ? "Pehle se account hai?" : "Account nahi hai?";
+            document.getElementById('toggle-btn').innerText = isSignUp ? "Login karein" : "Sign Up karein";
+        }
+
+        async function handleAuth() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                if (isSignUp) {
+                    await window.createUserWithEmailAndPassword(window.auth, email, password);
+                    alert("Account created & logged in successfully!");
+                } else {
+                    await window.signInWithEmailAndPassword(window.auth, email, password);
+                }
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        }
+
+        async function addTenant(e) {
+            e.preventDefault();
+            const name = document.getElementById('t-name').value;
+            const aadhar = document.getElementById('t-aadhar').value;
+            const room = document.getElementById('t-room').value;
+            const rent = document.getElementById('t-rent').value;
+            const dueDate = document.getElementById('t-duedate').value;
+            const status = document.getElementById('t-status').value;
+            const phone = document.getElementById('t-phone').value;
+
+            try {
+                await window.addDoc(window.collection(window.db, "tenants"), {
+                    name, aadhar, room, rent, dueDate, status, phone, createdAt: new Date()
+                });
+                document.getElementById('tenant-form').reset();
+                loadTenants();
+                alert("Tenant added successfully!");
+            } catch (error) {
+                alert("Error adding tenant: " + error.message);
+            }
+        }
+
+        async function loadTenants() {
+            const tbody = document.getElementById('tenant-list');
+            tbody.innerHTML = "<tr><td colspan='6' class='py-4 text-center'>Loading...</td></tr>";
+            try {
+                const querySnapshot = await window.getDocs(window.collection(window.db, "tenants"));
+                tbody.innerHTML = "";
+                querySnapshot.forEach((docSnap) => {
+                    const t = docSnap.data();
+                    const id = docSnap.id;
+                    
+                    // Advance payment logic: agar advance ho toh due date hide karein
+                    const dueDisplay = t.status === 'Advance' 
+                        ? `<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">Advance Paid (No Due)</span>` 
+                        : `<span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold">Due: ${t.dueDate}</span>`;
+
+                    const row = `
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-4">${t.room}</td>
+                            <td class="py-3 px-4 font-bold">${t.name}</td>
+                            <td class="py-3 px-4">${t.aadhar}</td>
+                            <td class="py-3 px-4">₹${t.rent}</td>
+                            <td class="py-3 px-4">${dueDisplay}</td>
+                            <td class="py-3 px-4 space-x-2">
+                                <a href="https://wa.me/${t.phone}?text=Hello%20${t.name},%20aapka%20room%20no%20${t.room}%20ka%20rent%20₹${t.rent}%20due%20hai.%20Kripya%20jald%20pay%20karein." target="_blank" class="bg-green-500 text-white px-3 py-1 rounded text-xs font-bold hover:bg-green-600">WhatsApp</a>
+                                <button onclick="toggleStatus('${id}', '${t.status}')" class="bg-yellow-500 text-white px-3 py-1 rounded text-xs font-bold hover:bg-yellow-600">Toggle Status</button>
+                                <button onclick="deleteTenant('${id}')" class="bg-red-500 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-600">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function toggleStatus(id, currentStatus) {
+            const newStatus = currentStatus === 'Advance' ? 'Due' : 'Advance';
+            try {
+                await window.updateDoc(window.doc(window.db, "tenants", id), { status: newStatus });
+                loadTenants();
+            } catch (error) {
+                alert("Error updating status: " + error.message);
+            }
+        }
+
+        async function deleteTenant(id) {
+            if (confirm("Kya aap sach me is tenant ko delete karna chahte hain?")) {
+                try {
+                    await window.deleteDoc(window.doc(window.db, "tenants", id));
+                    loadTenants();
+                } catch (error) {
+                    alert("Error deleting: " + error.message);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
